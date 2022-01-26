@@ -7,17 +7,15 @@
 
 class KY040b
 {
-    const int Button1=0;    // Up Button
-    const int Button2=1;    // Down Button  
+    int Button1=0;    // Up Button
+    int Button2=1;    // Down Button  
     // pins
     int CLK;  // CK on encoder
     int DT;  // DT on encoder
-    int PUSH; // push shaft on encoder (marked 'SW' on unit)
     // debounce time for all pins
     int debounce; // ms debounce time
 
   public:
-    bool enc_pressed = false;
     bool moved = false;
     int position = 0;
     Joystick_ * Joystick; 
@@ -25,50 +23,67 @@ class KY040b
     // I exposed these for easy external access, rather than using delegates
     ezButton * buttonClk;
     ezButton * buttonDt;
-    ezButton * buttonPush;
 
     // Contructor provides defaults for pins and debounce time - I am using a MEGA2560
-    KY040b(int clkpin=2, int dtpin=4, int buttonpin=3, int deb=10 )
+    KY040b(int clkpin=2, int dtpin=4, int deb=10, int buttonUp=0, int buttonDown=1 )
     // default construction using pro-forma parameters
-       : CLK(clkpin), DT(dtpin), PUSH(buttonpin), debounce(deb)
+       : CLK(clkpin), DT(dtpin), debounce(deb), Button1(buttonUp), Button2(buttonDown)
     {
         buttonClk = new ezButton(CLK);
         buttonDt = new ezButton(DT);
-        buttonPush = new ezButton(PUSH);
 
         buttonClk->setDebounceTime(debounce);
         buttonDt->setDebounceTime(debounce);
-        buttonPush->setDebounceTime(debounce);
+
+        Button1 = buttonUp;
+        Button2 = buttonDown;
+        
 
         pinMode (CLK,INPUT);
         pinMode (DT,INPUT);
-        pinMode (PUSH, INPUT); 
+
+         #ifdef _DEBUG_ENCODER_
+              Serial.print("Init Button1: "); Serial.println(Button1);
+              Serial.print("Init Button2: "); Serial.println(Button2);
+              Serial.print("Init DT: "); Serial.println(DT);
+              Serial.print("Init DT: "); Serial.println(DT);
+
+
+       #endif
     };
 
     ~KY040b()
     {
       delete buttonClk;
       delete buttonDt;
-      delete buttonPush;
     };
 
     
 void nullButton() {
   Joystick->setButton(Button1, 0);
   Joystick->setButton(Button2, 0);
+  #ifdef _DEBUG_ENCODER_
+              Serial.print("Button Null: "); Serial.print(Button1);Serial.print(":");Serial.println(Button2);
+       #endif
 }
  // Check if Rotary Encoder was moved
 void tapButtonUp() {
   Joystick->setButton(Button1, 1);
   Joystick->setButton(Button2, 0);
-  delay(200);
+   #ifdef _DEBUG_ENCODER_
+              Serial.print("Button Up: "); Serial.println(Button1);
+       #endif
+  // delay(200);
   
 }
 
 void tapButtonDown() {
   Joystick->setButton(Button1, 0);
   Joystick->setButton(Button2, 1);
-  delay(200);  
+   #ifdef _DEBUG_ENCODER_
+              Serial.print("Button Down: "); Serial.println(Button2);
+       #endif
+  //delay(200);  
 
 }
     
@@ -83,17 +98,10 @@ void tapButtonDown() {
 
       buttonClk->loop(); // MUST call the loop() func for each pin
       buttonDt->loop(); //
-      buttonPush->loop();
 
-      enc_pressed = buttonPush->isPressed(); // test shaft 'pushed'
-      #ifdef _DEBUG_ENCODER_
-          if (enc_pressed)
-              Serial.println("pressed");
-      #endif
-    
       value = buttonClk->getState();
        #ifdef _DEBUG_ENCODER_
-              Serial.print("value: "); Serial.println(value);
+              Serial.print("value CLk State: ");Serial.print(value); Serial.print(" CLK: "); Serial.print(CLK); Serial.print(" DT: "); Serial.println (DT);;
        #endif
       if (value != rotation) // compare with previous reading
       { 
@@ -159,11 +167,11 @@ int prop1_ = 0;
 int prop2_ = 0;
 
 
+//int clkpin=2, int dtpin=4, int deb=10, int buttonUp, int buttonDown
+KY040b encoder (2, 4, 11,0,1); 
+KY040b encoder2 (5,6,15,2,3);
+KY040b encoder3 (7,8,15,4,5);
 
-const int Button1=0;    // Up Button
-const int Button2=1;    // Down Button
-
-KY040b encoder; // defaults to: 32,34,36,25
 
 
 
@@ -177,7 +185,7 @@ void setup()
   Joystick.setRudderRange(40, 981);
   Joystick.setThrottleRange(40, 981);
 
-    Serial.begin(9600);
+    Serial.begin(2000000);
 
 
   pinMode(LED_BUILTIN, OUTPUT);     // built in LED on arduino board for debug and demonstration purposes
@@ -215,11 +223,7 @@ void loop()
   prop1_ = map(prop1_,0,1023, 45,980);
   prop2_ = analogRead(A1);
   prop2_ = map(prop2_,0,1023, 45,980);
-  Serial.println("Prop1a:"); Serial.println(prop1_);
-  Serial.println("Prop2a:"); Serial.println(prop2_);
-  Serial.println("Throttle1:"); Serial.println(throttle1_);
-  Serial.println("Throttle2:"); Serial.println(throttle2_);
-
+ 
   Joystick.setXAxis(prop1_);
   Joystick.setYAxis(prop2_);
   Joystick.setThrottle(throttle1_);
@@ -227,21 +231,56 @@ void loop()
 
 
  static int position = 0;
+  static int position2 = 0;
+ static int position3 = 0;
+
+ 
     encoder.loop();
+    
     int pos = encoder.position;
     if (pos != position)
     {
         position = pos;
-        Serial.print("Encoder Position: "); Serial.println(position);
+        Serial.print("Encoder Position1: "); Serial.println(position);
         
     }
-    bool pressed = encoder.enc_pressed;
-    if (pressed)
-        Serial.println("pressed");
+
     if (encoder.moved)
       encoder.nullButton();
 
+      //Encoder 2
+
+    encoder2.loop();
+
+
+    int pos2 = encoder2.position;
+    if (pos2 != position2)
+    {
+        position2 = pos2;
+        Serial.print("Encoder Position2: "); Serial.println(position2);
+        
+    }
+   
+    if (encoder2.moved)
+      encoder2.nullButton();
+
+//Encoder 3
+    encoder3.loop();
+
+    int pos3 = encoder3.position;
+    if (pos3 != position3)
+    {
+        position3 = pos3;
+        Serial.print("Encoder Position3: "); Serial.println(position3);
+        
+    }
+   
+    if (encoder3.moved)
+      encoder3.nullButton();
+
 }
+
+
 
 
 
