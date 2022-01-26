@@ -28,7 +28,7 @@ class KY040b
     ezButton * buttonPush;
 
     // Contructor provides defaults for pins and debounce time - I am using a MEGA2560
-    KY040b(int clkpin=2, int dtpin=4, int buttonpin=3, int deb=5 )
+    KY040b(int clkpin=2, int dtpin=4, int buttonpin=3, int deb=10 )
     // default construction using pro-forma parameters
        : CLK(clkpin), DT(dtpin), PUSH(buttonpin), debounce(deb)
     {
