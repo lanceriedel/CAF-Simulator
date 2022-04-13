@@ -25,7 +25,7 @@ class KY040b
     ezButton * buttonDt;
 
     // Contructor provides defaults for pins and debounce time - I am using a MEGA2560
-    KY040b(int clkpin=2, int dtpin=4, int deb=10, int buttonUp=0, int buttonDown=1 )
+    KY040b(int clkpin=2, int dtpin=4, int deb=10, int buttonUp=0, int buttonDown=1 )  
     // default construction using pro-forma parameters
        : CLK(clkpin), DT(dtpin), debounce(deb), Button1(buttonUp), Button2(buttonDown)
     {
@@ -101,7 +101,7 @@ void tapButtonDown() {
 
       value = buttonClk->getState();
        #ifdef _DEBUG_ENCODER_
-              Serial.print("value CLk State: ");Serial.print(value); Serial.print(" CLK: "); Serial.print(CLK); Serial.print(" DT: "); Serial.println (DT);;
+       //       Serial.print("value CLk State: ");Serial.print(value); Serial.print(" CLK: "); Serial.print(CLK); Serial.print(" DT: "); Serial.println (DT);;
        #endif
       if (value != rotation) // compare with previous reading
       { 
@@ -158,6 +158,7 @@ void tapButtonDown() {
 }; // end KY040b
     
 
+Joystick_ Joystick; 
 
 //int clkpin=2, int dtpin=4, int deb=10, int buttonUp, int buttonDown
 KY040b encoder (2, 4, 11,0,1); 
