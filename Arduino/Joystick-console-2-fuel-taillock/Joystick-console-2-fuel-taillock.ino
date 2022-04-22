@@ -25,7 +25,7 @@ class KY040b
     ezButton * buttonDt;
 
     // Contructor provides defaults for pins and debounce time - I am using a MEGA2560
-    KY040b(int clkpin=2, int dtpin=4, int deb=10, int buttonUp=0, int buttonDown=1 )  
+    KY040b(int clkpin=2, int dtpin=4, int deb=10, int buttonUp=0, int buttonDown=1 )
     // default construction using pro-forma parameters
        : CLK(clkpin), DT(dtpin), debounce(deb), Button1(buttonUp), Button2(buttonDown)
     {
@@ -101,7 +101,7 @@ void tapButtonDown() {
 
       value = buttonClk->getState();
        #ifdef _DEBUG_ENCODER_
-       //       Serial.print("value CLk State: ");Serial.print(value); Serial.print(" CLK: "); Serial.print(CLK); Serial.print(" DT: "); Serial.println (DT);;
+              Serial.print("value CLk State: ");Serial.print(value); Serial.print(" CLK: "); Serial.print(CLK); Serial.print(" DT: "); Serial.println (DT);;
        #endif
       if (value != rotation) // compare with previous reading
       { 
@@ -158,7 +158,14 @@ void tapButtonDown() {
 }; // end KY040b
     
 
+// Create Joystick
 Joystick_ Joystick; 
+int throttle1_ = 0;
+int throttle2_ = 0;
+
+int prop1_ = 0;
+int prop2_ = 0;
+
 
 //int clkpin=2, int dtpin=4, int deb=10, int buttonUp, int buttonDown
 KY040b encoder (2, 4, 11,0,1); 
@@ -172,7 +179,12 @@ KY040b encoder3 (7,8,15,4,5);
 void setup() 
 {
   encoder.Joystick = &Joystick;
- 
+  Joystick.setXAxisRange(40, 981);
+  Joystick.setYAxisRange(40, 981);
+
+  Joystick.setRudderRange(40, 981);
+  Joystick.setThrottleRange(40, 981);
+
     Serial.begin(2000000);
 
 
@@ -183,6 +195,7 @@ void setup()
   pinMode(A3, INPUT);
 
 
+  Joystick.begin(true);
    
 
  
@@ -202,9 +215,23 @@ void setup()
 
 void loop() 
 {
-  
+  throttle1_ = analogRead(A2);
+  throttle1_ = map(throttle1_,0,1023, 45,980);
+  throttle2_ = analogRead(A3);
+  throttle2_ = map(throttle2_,0,1023, 45,980);
+  prop1_ = analogRead(A0);
+  prop1_ = map(prop1_,0,1023, 45,980);
+  prop2_ = analogRead(A1);
+  prop2_ = map(prop2_,0,1023, 45,980);
+ 
+  Joystick.setXAxis(prop1_);
+  Joystick.setYAxis(prop2_);
+  Joystick.setThrottle(throttle1_);
+  Joystick.setRudder(throttle2_);
+
+
  static int position = 0;
- static int position2 = 0;
+  static int position2 = 0;
  static int position3 = 0;
 
  
